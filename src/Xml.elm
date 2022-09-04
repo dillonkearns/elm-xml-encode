@@ -1,6 +1,7 @@
 module Xml exposing
     ( Value(..)
     , foldl, map, xmlToJson2, jsonToXml
+    , isValidXmlName
     )
 
 {-| The main data structure along with some trivial helpers.
@@ -14,6 +15,7 @@ module Xml exposing
 import Dict exposing (Dict)
 import Json.Decode as JD
 import Json.Encode as Json
+import Regex
 
 
 {-| Representation of the XML tree
@@ -63,6 +65,17 @@ foldl fn init value =
 
         anything ->
             fn anything init
+
+
+isValidXmlName : String -> Bool
+isValidXmlName =
+    let
+        nameRegex =
+            -- O'Reilly: XML in a Nutshell: https://docstore.mik.ua/orelly/xml/xmlnut/ch02_04.htm
+            Maybe.withDefault Regex.never
+                (Regex.fromString "^[_a-zA-Z0-9\\p{Letter}][-_.:a-zA-Z0-9\\p{Letter}]*$")
+    in
+    Regex.contains nameRegex
 
 
 {-| Convert an `Xml.Value` to a `Json.Value`
