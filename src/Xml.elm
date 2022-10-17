@@ -1,14 +1,32 @@
 module Xml exposing
     ( Value(..)
-    , foldl, map, xmlToJson2, jsonToXml
-    , isValidXmlName
+    , foldl, map
+    , xmlToJson2, jsonToXml, xmlDecoder, isValidXmlName
+    , decodeXmlEntities, encodeXmlEntities
     )
 
 {-| The main data structure along with some trivial helpers.
 
 @docs Value
 
-@docs foldl, map, xmlToJson2, jsonToXml
+@docs foldl, map
+
+
+# XML/JSON conversion
+
+This library can convert to and from `Json.Value`.
+
+@docs xmlToJson2, jsonToXml, xmlDecoder, isValidXmlName
+
+
+# XML character entities
+
+This library can encode and decode the five predefined XML character entities.
+Numeric character references and other named HTML entities (e.g. `&#x20ac;`
+or `&euro;`) are currently not supported.
+Please try to use UTF-8 / Unicode instead.
+
+@docs decodeXmlEntities, encodeXmlEntities
 
 -}
 
@@ -26,6 +44,7 @@ type Value
     | IntNode Int
     | FloatNode Float
     | BoolNode Bool
+    | NullNode
     | Object (List Value)
     | DocType String (Dict String Value)
 
@@ -67,6 +86,53 @@ foldl fn init value =
             fn anything init
 
 
+{-| Encode string with XML entities
+
+    encodeXmlEntities "<hello>"
+    --> "&lt;hello&gt;"
+
+-}
+encodeXmlEntities : String -> String
+encodeXmlEntities s =
+    List.foldr (\( x, y ) z -> String.replace (String.fromChar x) ("&" ++ y ++ ";") z) s predefinedEntities
+
+
+{-| Decode string with XML entities
+
+    decodeXmlEntities "&lt;hello&gt;"
+    --> "<hello>"
+
+    Do not decode entities twice!
+
+    decodeXmlEntities "&amp;lt;hello&gt;"
+    --> "&lt;hello>"
+
+-}
+decodeXmlEntities : String -> String
+decodeXmlEntities s =
+    List.foldl (\( x, y ) z -> String.replace ("&" ++ y ++ ";") (String.fromChar x) z) s predefinedEntities
+
+
+predefinedEntities : List ( Char, String )
+predefinedEntities =
+    -- https://en.wikipedia.org/wiki/List_of_XML_and_HTML_character_entity_references
+    [ ( '"', "quot" )
+    , ( '\'', "apos" )
+    , ( '<', "lt" )
+    , ( '>', "gt" )
+
+    -- & / &amp; must come last!
+    , ( '&', "amp" )
+    ]
+
+
+{-| Test that a string is a valid XML name.
+
+This enforces the rules for XML tag and attribute names, as well as for the names of several less common constructs.
+
+See _O'Reilly: XML in a Nutshell_: [2.4 XML Names](https://docstore.mik.ua/orelly/xml/xmlnut/ch02_04.htm).
+
+-}
 isValidXmlName : String -> Bool
 isValidXmlName =
     let
@@ -109,6 +175,9 @@ Renamed from xmlToJson to force a bump to version 2.0.
     xmlToJson2 (DocType "" Dict.empty)
     --> Json.null
 
+    xmlToJson2 NullNode
+    --> Json.null
+
 -}
 xmlToJson2 : Value -> Json.Value
 xmlToJson2 xml =
@@ -143,6 +212,9 @@ xmlToJson2 xml =
         BoolNode bool ->
             Json.bool bool
 
+        NullNode ->
+            Json.null
+
         Object values ->
             Json.list xmlToJson2 values
 
@@ -159,6 +231,9 @@ xmlDecoder =
         , JD.map IntNode JD.int
         , JD.map FloatNode JD.float
         , JD.map BoolNode JD.bool
+
+        -- This is the most explicit way to store a null value:
+        , JD.map (\_ -> NullNode) (JD.null 0)
         , JD.list (JD.lazy (\_ -> xmlDecoder))
             |> JD.andThen
                 (\list ->
@@ -180,6 +255,11 @@ xmlDecoder =
                             case val of
                                 Object list ->
                                     list
+                                        -- reverse the list before it
+                                        -- is processed with foldl and
+                                        -- :: (which reverses the
+                                        -- order again)
+                                        |> List.reverse
                                         |> List.foldl
                                             (\v ( a_, p_ ) ->
                                                 case v of
