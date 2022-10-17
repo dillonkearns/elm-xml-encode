@@ -1,7 +1,7 @@
 module Xml exposing
     ( Value(..)
     , foldl, map
-    , xmlToJson2, jsonToXml, xmlDecoder
+    , xmlToJson2, jsonToXml, xmlDecoder, isValidXmlName
     , decodeXmlEntities, encodeXmlEntities
     )
 
@@ -16,7 +16,7 @@ module Xml exposing
 
 This library can convert to and from `Json.Value`.
 
-@docs xmlToJson2, jsonToXml, xmlDecoder
+@docs xmlToJson2, jsonToXml, xmlDecoder, isValidXmlName
 
 
 # XML character entities
@@ -33,6 +33,7 @@ Please try to use UTF-8 / Unicode instead.
 import Dict exposing (Dict)
 import Json.Decode as JD
 import Json.Encode as Json
+import Regex
 
 
 {-| Representation of the XML tree
@@ -123,6 +124,24 @@ predefinedEntities =
     -- & / &amp; must come last!
     , ( '&', "amp" )
     ]
+
+
+{-| Test that a string is a valid XML name.
+
+This enforces the rules for XML tag and attribute names, as well as for the names of several less common constructs.
+
+See _O'Reilly: XML in a Nutshell_: [2.4 XML Names](https://docstore.mik.ua/orelly/xml/xmlnut/ch02_04.htm).
+
+-}
+isValidXmlName : String -> Bool
+isValidXmlName =
+    let
+        nameRegex =
+            -- O'Reilly: XML in a Nutshell: https://docstore.mik.ua/orelly/xml/xmlnut/ch02_04.htm
+            Maybe.withDefault Regex.never
+                (Regex.fromString "^[_a-zA-Z0-9\\p{Letter}][-_.:a-zA-Z0-9\\p{Letter}]*$")
+    in
+    Regex.contains nameRegex
 
 
 {-| Convert an `Xml.Value` to a `Json.Value`

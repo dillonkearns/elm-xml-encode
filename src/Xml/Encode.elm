@@ -1,6 +1,6 @@
 module Xml.Encode exposing
     ( encode, encodeWith, EncodeSettings, defaultEncodeSettings
-    , string, int, float, bool, object, null, list
+    , string, int, float, bool, object, objectSafe, null, list
     )
 
 {-| Use this module for turning your Elm data into an `Xml`
@@ -9,13 +9,16 @@ string.
 
 @docs encode, encodeWith, EncodeSettings, defaultEncodeSettings
 
-@docs string, int, float, bool, object, null, list
+@docs string, int, float, bool, object, objectSafe, null, list
 
 -}
 
+-- TODO: Attribute names AND tag names must be validated.
+-- Tags are also created in jsonToXml!
+
 import Dict exposing (Dict)
 import String
-import Xml exposing (Value(..), encodeXmlEntities)
+import Xml exposing (Value(..), encodeXmlEntities, isValidXmlName)
 
 
 {-| Settings used by `encodeWith`.
@@ -244,6 +247,34 @@ object : List ( String, Dict String Value, Value ) -> Value
 object values =
     List.map (\( name, props, value ) -> Tag name props value) values
         |> Object
+
+
+{-| Encode an "object" (a tag) only allowing valid tag names
+
+    import Dict
+
+-}
+objectSafe : List ( String, Dict String Value, Value ) -> Result String Value
+objectSafe values =
+    let
+        invalidTagNames =
+            List.filterMap
+                (\( name, _, _ ) ->
+                    if isValidXmlName name then
+                        Nothing
+
+                    else
+                        Just name
+                )
+                values
+    in
+    if List.isEmpty invalidTagNames then
+        List.map (\( name, props, value ) -> Tag name props value) values
+            |> Object
+            |> Ok
+
+    else
+        Err ("Invalid tag names: " ++ String.concat (List.intersperse ", " invalidTagNames))
 
 
 {-| Encode a list of nodes, e.g
