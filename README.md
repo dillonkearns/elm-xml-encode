@@ -24,6 +24,39 @@ xmlDocument =
 -- Result: "<root>Hello, World!</root>"
 ```
 
+## CDATA Support
+
+Use `cdata` to embed HTML or other XML content without entity escaping:
+
+```elm
+import Xml.Encode exposing (..)
+import Dict
+
+-- Regular string encoding (entities are escaped)
+regularContent : String
+regularContent =
+    object 
+        [ ( "description", Dict.empty, string "<p>HTML & symbols</p>" ) ]
+        |> encode 0
+-- Result: "<description>&lt;p&gt;HTML &amp; symbols&lt;/p&gt;</description>"
+
+-- CDATA encoding (content preserved as-is)
+cdataContent : String  
+cdataContent =
+    object 
+        [ ( "description", Dict.empty, cdata "<p>HTML & symbols</p>" ) ]
+        |> encode 0
+-- Result: "<description><![CDATA[<p>HTML & symbols</p>]]></description>"
+
+-- CDATA automatically handles problematic sequences
+problematicContent : String
+problematicContent =
+    object 
+        [ ( "content", Dict.empty, cdata "Text with ]]> sequence" ) ]
+        |> encode 0
+-- Result: "<content><![CDATA[Text with ]]]]><![CDATA[> sequence]]></content>"
+```
+
 ## Features
 
 - XML encoding with entity escaping
