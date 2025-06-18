@@ -157,10 +157,10 @@ propsToString setts props =
         ""
 
     else
-        props
-            |> Dict.foldr (\key value acc -> (key ++ "=" ++ quote ++ propToString setts value ++ quote) :: acc) []
-            |> String.join " "
-            |> (\x -> " " ++ x)
+        Dict.foldl
+            (\key value acc -> acc ++ " " ++ key ++ "=" ++ quote ++ propToString setts value ++ quote)
+            ""
+            props
 
 
 needsIndent : Value -> Bool
