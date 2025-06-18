@@ -278,8 +278,8 @@ string =
 
 -}
 int : Int -> Value
-int n =
-    IntNode n
+int =
+    IntNode
 
 
 {-| Encode a float
@@ -289,8 +289,8 @@ int n =
 
 -}
 float : Float -> Value
-float n =
-    FloatNode n
+float =
+    FloatNode
 
 
 {-| Encode a bool
@@ -303,8 +303,8 @@ float n =
 
 -}
 bool : Bool -> Value
-bool b =
-    BoolNode b
+bool =
+    BoolNode
 
 
 {-| Encode content as CDATA (Character Data) for embedding HTML or other XML content
@@ -314,8 +314,8 @@ bool b =
 
 -}
 cdata : String -> Value
-cdata str =
-    CdataNode str
+cdata =
+    CdataNode
 
 
 {-| Encode an "object" (a tag)
@@ -363,8 +363,8 @@ objectSafe values =
 
 -}
 list : List Value -> Value
-list values =
-    Object values
+list =
+    Object
 
 
 {-| Empty contents
