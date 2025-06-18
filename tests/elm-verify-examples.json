@@ -1,5 +1,4 @@
 {
-  "root": "../src",
   "tests": [
 	"Xml.Encode"
   ]
