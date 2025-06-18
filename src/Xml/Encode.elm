@@ -1,7 +1,8 @@
 module Xml.Encode exposing
     ( encode, encodeWith, EncodeSettings, defaultEncodeSettings
     , string, int, float, bool, object, objectSafe, null, list, cdata
-    , Value(..)  -- Exposing Value type and constructors
+    , Value(..)
+    -- Exposing Value type and constructors
     )
 
 {-| Use this module for turning your Elm data into an XML string.
