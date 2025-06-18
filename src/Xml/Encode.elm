@@ -153,16 +153,14 @@ propsToString setts props =
             else
                 "\""
     in
-    props
-        |> Dict.foldr (\key value acc -> (key ++ "=" ++ quote ++ propToString setts value ++ quote) :: acc) []
-        |> String.join " "
-        |> (\x ->
-                if String.length x > 0 then
-                    " " ++ x
+    if Dict.isEmpty props then
+        ""
 
-                else
-                    ""
-           )
+    else
+        props
+            |> Dict.foldr (\key value acc -> (key ++ "=" ++ quote ++ propToString setts value ++ quote) :: acc) []
+            |> String.join " "
+            |> (\x -> " " ++ x)
 
 
 needsIndent : Value -> Bool
