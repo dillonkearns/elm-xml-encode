@@ -1,0 +1,115 @@
+name: Elm CI
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Use Node.js 20
+        uses: actions/setup-node@v1
+        with:
+          node-version: 20
+      - uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+      - uses: actions/cache@v4
+        id: elm-cache
+        with:
+          path: ~/.elm
+          key: ${{ runner.os }}-elm-home-${{ hashFiles('**/elm.json') }}
+      - run: npm ci
+      - run: npx elm make --output /dev/null
+      - run: ./run_tests.sh
+
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Use Node.js 20
+        uses: actions/setup-node@v1
+        with:
+          node-version: 20
+      - uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+      - uses: actions/cache@v4
+        id: elm-cache
+        with:
+          path: ~/.elm
+          key: ${{ runner.os }}-elm-home-${{ hashFiles('**/elm.json') }}
+      - run: npm ci
+      - run: npx elm make --output /dev/null
+      - name: elm-format
+        run: npx --no-install elm-format --validate src tests
+      - name: elm-review
+        run: npm run review
+
+  validate-package:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Use Node.js 20
+        uses: actions/setup-node@v1
+        with:
+          node-version: 20
+      - uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+      - uses: actions/cache@v4
+        id: elm-cache
+        with:
+          path: ~/.elm
+          key: ${{ runner.os }}-elm-home-${{ hashFiles('**/elm.json') }}
+      - run: npm ci
+      - run: npx elm make --output /dev/null
+      - name: Build elm docs
+        run: npx elm make --docs docs.json
+
+  publish:
+    needs: [test, lint, validate-package]
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Use Node.js 20
+        uses: actions/setup-node@v1
+        with:
+          node-version: 20
+      - uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+      - uses: actions/cache@v4
+        id: elm-cache
+        with:
+          path: ~/.elm
+          key: ${{ runner.os }}-elm-home-${{ hashFiles('**/elm.json') }}
+      - run: npm ci
+      - run: npx elm make --output /dev/null
+      - name: Elm Publish
+        uses: dillonkearns/elm-publish-action@v1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path-to-elm: ./node_modules/.bin/elm

@@ -1,10 +1,11 @@
 {
   "type": "module",
   "scripts": {
-    "review": "elm-review",
-    "review:fix": "elm-review --fix-all"
+    "test": "elm-test && npx elm-verify-examples --run-tests",
+    "review": "elm-review"
   },
   "devDependencies": {
-    "elm-review": "^2.13.2"
+    "elm-review": "^2.13.2",
+    "elm-verify-examples": "^6.0.3"
   }
 }
