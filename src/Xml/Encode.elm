@@ -1,6 +1,6 @@
 module Xml.Encode exposing
     ( encode, encodeWith, EncodeSettings, defaultEncodeSettings
-    , string, int, float, bool, object, objectSafe, null, list
+    , string, int, float, bool, object, objectSafe, null, list, cdata
     , Value(..)  -- Exposing Value type and constructors
     )
 
@@ -8,7 +8,7 @@ module Xml.Encode exposing
 
 @docs encode, encodeWith, EncodeSettings, defaultEncodeSettings
 
-@docs string, int, float, bool, object, objectSafe, null, list
+@docs string, int, float, bool, object, objectSafe, null, list, cdata
 
 @docs Value
 
@@ -33,13 +33,10 @@ type Value
     | NullNode
     | Object (List Value)
     | DocType String (Dict String Value)
+    | CdataNode String
 
 
 {-| Encode string with XML entities
-
-    encodeXmlEntities "<hello>"
-    --> "&lt;hello&gt;"
-
 -}
 encodeXmlEntities : String -> String
 encodeXmlEntities s =
@@ -57,6 +54,14 @@ predefinedEntities =
     -- & / &amp; must come last!
     , ( '&', "amp" )
     ]
+
+
+{-| Escape CDATA content by splitting ]]> sequences
+-}
+escapeCdataContent : String -> String
+escapeCdataContent str =
+    -- Replace ]]> with ]]]]><![CDATA[> to properly escape it in CDATA
+    String.replace "]]>" "]]]]><![CDATA[>" str
 
 
 {-| Test that a string is a valid XML name.
@@ -128,6 +133,10 @@ propToString setts value =
 
         FloatNode f ->
             String.fromFloat f
+
+        CdataNode str ->
+            -- CDATA should not be used in attributes, so escape it
+            encodeXmlEntities str
 
         _ ->
             ""
@@ -232,6 +241,9 @@ valueToString setts level indent value =
                 ++ propsToString setts props
                 ++ "?>"
 
+        CdataNode str ->
+            "<![CDATA[" ++ escapeCdataContent str ++ "]]>"
+
 
 {-| Take a value, then generate a string from it
 -}
@@ -295,6 +307,17 @@ float n =
 bool : Bool -> Value
 bool b =
     BoolNode b
+
+
+{-| Encode content as CDATA (Character Data) for embedding HTML or other XML content
+
+    cdata "<p>This is <strong>bold</strong> text</p>" |> encode 0
+    --> "<![CDATA[<p>This is <strong>bold</strong> text</p>]]>"
+
+-}
+cdata : String -> Value
+cdata str =
+    CdataNode str
 
 
 {-| Encode an "object" (a tag)
