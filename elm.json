@@ -3,7 +3,7 @@
     "name": "dillonkearns/elm-xml-encode",
     "summary": "XML encoder with proper CDATA support for RSS feeds",
     "license": "BSD-3-Clause",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "exposed-modules": [
         "Xml.Encode"
     ],
