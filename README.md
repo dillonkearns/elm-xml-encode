@@ -34,4 +34,4 @@ xmlDocument =
 
 ## API Reference
 
-See the [package documentation](https://package.elm-lang.org/packages/dillonkearns/elm-xml-encode/latest/) for detailed API information.
+See the [package documentation](https://package.elm-lang.org/packages/dillonkearns/elm-xml-encode/1.0.0/) for detailed API information.

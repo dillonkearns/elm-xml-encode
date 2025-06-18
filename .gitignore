@@ -5,3 +5,4 @@ repl-temp-*
 docs.json
 tests/VerifyExamples/
 
+node_modules

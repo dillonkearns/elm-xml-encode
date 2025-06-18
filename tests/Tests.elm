@@ -1,4 +1,4 @@
-module Tests exposing (..)
+module Tests exposing (all)
 
 import Dict
 import Expect
@@ -128,42 +128,54 @@ all =
             [ test "String with HTML content should use CDATA" <|
                 \_ ->
                     let
-                        htmlContent = "<p>This is <strong>bold</strong> text with & symbols</p>"
-                        val = 
+                        htmlContent =
+                            "<p>This is <strong>bold</strong> text with & symbols</p>"
+
+                        val =
                             object
                                 [ ( "description", Dict.empty, cdata htmlContent ) ]
                     in
-                    Expect.equal (encode 0 val) 
+                    Expect.equal (encode 0 val)
                         ("<description><![CDATA[" ++ htmlContent ++ "]]></description>")
             , test "Plain string should not use CDATA" <|
                 \_ ->
                     let
-                        plainContent = "This is plain text"
-                        val = 
+                        plainContent =
+                            "This is plain text"
+
+                        val =
                             object
                                 [ ( "description", Dict.empty, string plainContent ) ]
                     in
-                    Expect.equal (encode 0 val) 
-                        ("<description>This is plain text</description>")
+                    Expect.equal (encode 0 val)
+                        "<description>This is plain text</description>"
             , test "CDATA with closing sequence ]]> should be properly escaped" <|
                 \_ ->
                     let
-                        contentWithCdataEnd = "Some text ]]> and more text"
-                        val = 
+                        contentWithCdataEnd =
+                            "Some text ]]> and more text"
+
+                        val =
                             object
                                 [ ( "description", Dict.empty, cdata contentWithCdataEnd ) ]
+
                         -- Should split CDATA to avoid ]]> terminating it early
-                        expectedOutput = "<description><![CDATA[Some text ]]]]><![CDATA[> and more text]]></description>"
+                        expectedOutput =
+                            "<description><![CDATA[Some text ]]]]><![CDATA[> and more text]]></description>"
                     in
                     Expect.equal (encode 0 val) expectedOutput
             , test "CDATA with multiple ]]> sequences should be properly escaped" <|
                 \_ ->
                     let
-                        contentWithMultiple = "First ]]> middle ]]> end"
-                        val = 
+                        contentWithMultiple =
+                            "First ]]> middle ]]> end"
+
+                        val =
                             object
                                 [ ( "description", Dict.empty, cdata contentWithMultiple ) ]
-                        expectedOutput = "<description><![CDATA[First ]]]]><![CDATA[> middle ]]]]><![CDATA[> end]]></description>"
+
+                        expectedOutput =
+                            "<description><![CDATA[First ]]]]><![CDATA[> middle ]]]]><![CDATA[> end]]></description>"
                     in
                     Expect.equal (encode 0 val) expectedOutput
             ]
@@ -171,13 +183,15 @@ all =
             [ test "String with XML entities gets encoded" <|
                 \_ ->
                     let
-                        val = string "<hello>"
+                        val =
+                            string "<hello>"
                     in
                     Expect.equal (encode 0 val) "&lt;hello&gt;"
             , test "String with all XML entities" <|
                 \_ ->
                     let
-                        val = string "<>&\"'"
+                        val =
+                            string "<>&\"'"
                     in
                     Expect.equal (encode 0 val) "&lt;&gt;&amp;&quot;&apos;"
             ]

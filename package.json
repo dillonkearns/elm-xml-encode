@@ -1,0 +1,10 @@
+{
+  "type": "module",
+  "scripts": {
+    "review": "elm-review",
+    "review:fix": "elm-review --fix-all"
+  },
+  "devDependencies": {
+    "elm-review": "^2.13.2"
+  }
+}
