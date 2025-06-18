@@ -1,7 +1,8 @@
 module Xml.Encode exposing
     ( encode, encodeWith, EncodeSettings, defaultEncodeSettings
     , string, int, float, bool, object, objectSafe, null, list, cdata
-    , Value(..)  -- Exposing Value type and constructors
+    , Value(..)
+    -- Exposing Value type and constructors
     )
 
 {-| Use this module for turning your Elm data into an XML string.
@@ -153,7 +154,7 @@ propsToString setts props =
                 "\""
     in
     Dict.toList props
-        |> List.map (\( key, value ) -> key ++ "=" ++ quote ++ propToString setts value ++ quote)
+        |> List.foldr (\( key, value ) acc -> (key ++ "=" ++ quote ++ propToString setts value ++ quote) :: acc) []
         |> String.join " "
         |> (\x ->
                 if String.length x > 0 then
