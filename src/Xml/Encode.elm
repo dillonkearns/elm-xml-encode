@@ -153,8 +153,8 @@ propsToString setts props =
             else
                 "\""
     in
-    Dict.foldr (\key value acc -> ( key, value ) :: acc) [] props
-        |> List.foldr (\( key, value ) acc -> (key ++ "=" ++ quote ++ propToString setts value ++ quote) :: acc) []
+    props
+        |> Dict.foldr (\key value acc -> (key ++ "=" ++ quote ++ propToString setts value ++ quote) :: acc) []
         |> String.join " "
         |> (\x ->
                 if String.length x > 0 then
