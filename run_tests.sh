@@ -1,3 +1,3 @@
 #!/bin/bash
 
-elm-verify-examples && elm-test
+npx elm-verify-examples && npx elm-test
