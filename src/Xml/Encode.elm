@@ -41,19 +41,19 @@ type Value
 -}
 encodeXmlEntities : String -> String
 encodeXmlEntities s =
-    List.foldr (\( x, y ) z -> String.replace (String.fromChar x) ("&" ++ y ++ ";") z) s predefinedEntities
+    List.foldr (\( x, y ) z -> String.replace x ("&" ++ y ++ ";") z) s predefinedEntities
 
 
-predefinedEntities : List ( Char, String )
+predefinedEntities : List ( String, String )
 predefinedEntities =
     -- https://en.wikipedia.org/wiki/List_of_XML_and_HTML_character_entity_references
-    [ ( '"', "quot" )
-    , ( '\'', "apos" )
-    , ( '<', "lt" )
-    , ( '>', "gt" )
+    [ ( "\"", "quot" )
+    , ( "'", "apos" )
+    , ( "<", "lt" )
+    , ( ">", "gt" )
 
     -- & / &amp; must come last!
-    , ( '&', "amp" )
+    , ( "&", "amp" )
     ]
 
 
