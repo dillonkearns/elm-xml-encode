@@ -3,3 +3,5 @@ elm-stuff/
 # elm-repl generated files
 repl-temp-*
 docs.json
+tests/VerifyExamples/
+

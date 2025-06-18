@@ -1,9 +1,6 @@
 {
   "root": "../src",
   "tests": [
-	"Xml.Decode", 
-	"Xml.Query",
-	"Xml.Encode",
-	"Xml"
+	"Xml.Encode"
   ]
 }

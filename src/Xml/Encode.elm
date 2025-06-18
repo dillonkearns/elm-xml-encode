@@ -1,15 +1,16 @@
 module Xml.Encode exposing
     ( encode, encodeWith, EncodeSettings, defaultEncodeSettings
     , string, int, float, bool, object, objectSafe, null, list
+    , Value(..)  -- Exposing Value type and constructors
     )
 
-{-| Use this module for turning your Elm data into an `Xml`
-representation that can be either queried or decoded, or turned into a
-string.
+{-| Use this module for turning your Elm data into an XML string.
 
 @docs encode, encodeWith, EncodeSettings, defaultEncodeSettings
 
 @docs string, int, float, bool, object, objectSafe, null, list
+
+@docs Value
 
 -}
 
@@ -17,8 +18,63 @@ string.
 -- Tags are also created in jsonToXml!
 
 import Dict exposing (Dict)
+import Regex
 import String
-import Xml exposing (Value(..), encodeXmlEntities, isValidXmlName)
+
+
+{-| Representation of the XML tree
+-}
+type Value
+    = Tag String (Dict String Value) Value
+    | StrNode String
+    | IntNode Int
+    | FloatNode Float
+    | BoolNode Bool
+    | NullNode
+    | Object (List Value)
+    | DocType String (Dict String Value)
+
+
+{-| Encode string with XML entities
+
+    encodeXmlEntities "<hello>"
+    --> "&lt;hello&gt;"
+
+-}
+encodeXmlEntities : String -> String
+encodeXmlEntities s =
+    List.foldr (\( x, y ) z -> String.replace (String.fromChar x) ("&" ++ y ++ ";") z) s predefinedEntities
+
+
+predefinedEntities : List ( Char, String )
+predefinedEntities =
+    -- https://en.wikipedia.org/wiki/List_of_XML_and_HTML_character_entity_references
+    [ ( '"', "quot" )
+    , ( '\'', "apos" )
+    , ( '<', "lt" )
+    , ( '>', "gt" )
+
+    -- & / &amp; must come last!
+    , ( '&', "amp" )
+    ]
+
+
+{-| Test that a string is a valid XML name.
+
+This enforces the rules for XML tag and attribute names, as well as for the names of several less common constructs.
+
+See _O'Reilly: XML in a Nutshell_: [2.4 XML Names](https://docstore.mik.ua/orelly/xml/xmlnut/ch02_04.htm).
+
+-}
+isValidXmlName : String -> Bool
+isValidXmlName =
+    let
+        nameRegex =
+            -- O'Reilly: XML in a Nutshell: https://docstore.mik.ua/orelly/xml/xmlnut/ch02_04.htm
+            Maybe.withDefault Regex.never
+                (Regex.fromString "^[_a-zA-Z0-9\\p{Letter}][-_.:a-zA-Z0-9\\p{Letter}]*$")
+    in
+    Regex.contains nameRegex
 
 
 {-| Settings used by `encodeWith`.

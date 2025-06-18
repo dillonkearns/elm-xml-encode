@@ -1,14 +1,11 @@
 {
     "type": "package",
-    "name": "billstclair/elm-xml-eeue56",
-    "summary": "XML parser, encoder/decoder and queries in Elm",
+    "name": "dillonkearns/elm-xml-encode",
+    "summary": "XML encoder with proper CDATA support for RSS feeds",
     "license": "BSD-3-Clause",
-    "version": "3.1.1",
+    "version": "1.0.0",
     "exposed-modules": [
-        "Xml.Encode",
-        "Xml.Decode",
-        "Xml.Query",
-        "Xml"
+        "Xml.Encode"
     ],
     "elm-version": "0.19.0 <= v < 0.20.0",
     "dependencies": {
@@ -18,7 +15,7 @@
     },
     "test-dependencies": {
         "elm/time": "1.0.0 <= v < 2.0.0",
-        "elm-explorations/test": "1.1.0 <= v < 2.0.0",
+        "elm-explorations/test": "2.0.0 <= v < 3.0.0",
         "justinmimbs/time-extra": "1.1.1 <= v < 2.0.0",
         "rtfeldman/elm-iso8601-date-strings": "1.1.2 <= v < 2.0.0"
     }
