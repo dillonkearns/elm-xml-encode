@@ -5,7 +5,9 @@
     "review": "elm-review"
   },
   "devDependencies": {
+    "elm-format": "^0.8.7",
     "elm-review": "^2.13.2",
+    "elm-test": "^0.19.1-revision15",
     "elm-verify-examples": "^6.0.3"
   }
 }
