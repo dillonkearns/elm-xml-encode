@@ -41,19 +41,18 @@ type Value
 -}
 encodeXmlEntities : String -> String
 encodeXmlEntities s =
-    List.foldr (\( x, y ) z -> String.replace (String.fromChar x) ("&" ++ y ++ ";") z) s predefinedEntities
+    List.foldl (\( x, y ) z -> String.replace x ("&" ++ y ++ ";") z) s predefinedEntities
 
 
-predefinedEntities : List ( Char, String )
+predefinedEntities : List ( String, String )
 predefinedEntities =
     -- https://en.wikipedia.org/wiki/List_of_XML_and_HTML_character_entity_references
-    [ ( '"', "quot" )
-    , ( '\'', "apos" )
-    , ( '<', "lt" )
-    , ( '>', "gt" )
-
-    -- & / &amp; must come last!
-    , ( '&', "amp" )
+    [ -- & / &amp; must come first!
+      ( "&", "amp" )
+    , ( "\"", "quot" )
+    , ( "'", "apos" )
+    , ( "<", "lt" )
+    , ( ">", "gt" )
     ]
 
 
@@ -153,16 +152,14 @@ propsToString setts props =
             else
                 "\""
     in
-    Dict.toList props
-        |> List.map (\( key, value ) -> key ++ "=" ++ quote ++ propToString setts value ++ quote)
-        |> String.join " "
-        |> (\x ->
-                if String.length x > 0 then
-                    " " ++ x
+    if Dict.isEmpty props then
+        ""
 
-                else
-                    ""
-           )
+    else
+        Dict.foldl
+            (\key value acc -> acc ++ " " ++ key ++ "=" ++ quote ++ propToString setts value ++ quote)
+            ""
+            props
 
 
 needsIndent : Value -> Bool
@@ -281,8 +278,8 @@ string =
 
 -}
 int : Int -> Value
-int n =
-    IntNode n
+int =
+    IntNode
 
 
 {-| Encode a float
@@ -292,8 +289,8 @@ int n =
 
 -}
 float : Float -> Value
-float n =
-    FloatNode n
+float =
+    FloatNode
 
 
 {-| Encode a bool
@@ -306,8 +303,8 @@ float n =
 
 -}
 bool : Bool -> Value
-bool b =
-    BoolNode b
+bool =
+    BoolNode
 
 
 {-| Encode content as CDATA (Character Data) for embedding HTML or other XML content
@@ -317,8 +314,8 @@ bool b =
 
 -}
 cdata : String -> Value
-cdata str =
-    CdataNode str
+cdata =
+    CdataNode
 
 
 {-| Encode an "object" (a tag)
@@ -366,8 +363,8 @@ objectSafe values =
 
 -}
 list : List Value -> Value
-list values =
-    Object values
+list =
+    Object
 
 
 {-| Empty contents
